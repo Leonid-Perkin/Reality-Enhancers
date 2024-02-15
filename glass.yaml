@@ -1,0 +1,64 @@
+esphome:
+  name: glass
+  friendly_name: glass
+esp8266:
+  board: esp01_1m
+logger:
+api:
+  encryption:
+    key: "O7XcwXXRt9AT2gzYgsegh3cMtno8y/crSB2YyI6tULI="
+ota:
+  password: "430616155bb22b147b9de60cf89f8f0b"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password   
+time:
+  - platform: homeassistant
+    id: esptime
+font:
+  - file: 'slkscr.ttf'
+    id: font1
+    size: 9
+
+  - file: 'BebasNeue-Regular.ttf'
+    id: font2
+    size: 40
+
+  - file: 'arial.ttf'
+    id: font3
+    size: 12
+i2c:
+  sda: 5
+  scl: 4
+
+sensor:
+  - platform: homeassistant
+    id: uploadspeed
+    entity_id: sensor.archer_c6u_upload_speed
+    internal: true
+  - platform: homeassistant
+    id: downloadspeed
+    entity_id: sensor.archer_c6u_download_speed
+    internal: true
+  - platform: homeassistant
+    id: cputemp
+    entity_id: sensor.system_monitor_processor_temperature
+    internal: true
+    
+display:
+  - platform: ssd1306_i2c
+    model: "SH1106 128x64"
+    address: 0x3C
+    lambda: |-
+      it.printf(64, 0, id(font1), TextAlign::TOP_CENTER, "cyber-owl");
+      it.strftime(0, 60, id(font2), TextAlign::BASELINE_LEFT, "%H:%M", id(esptime).now());
+      if (id(downloadspeed).has_state()) {
+        it.printf(127, 23, id(font3), TextAlign::TOP_RIGHT , "%.1fkb/s", id(downloadspeed).state);
+      }
+      if (id(cputemp).has_state()) {
+        it.printf(127, 37, id(font3), TextAlign::TOP_RIGHT , "%.1fC", id(cputemp).state);
+      }
+      if (id(uploadspeed).has_state()) {
+        it.printf(127, 60, id(font3), TextAlign::BASELINE_RIGHT , "%.1fkb/s", id(uploadspeed).state);
+      }
